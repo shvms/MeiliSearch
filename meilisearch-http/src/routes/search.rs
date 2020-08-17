@@ -105,8 +105,13 @@ impl SearchQuery {
             .schema(&reader)?
             .ok_or(Error::internal("Impossible to retrieve the schema"))?;
 
-        let mut search_builder = index.new_search(self.q.clone());
+        let query = self
+            .q
+            .clone()
+            .map(|q| if q.is_empty() { None } else { Some(q) })
+            .flatten();
 
+        let mut search_builder = index.new_search(query);
         if let Some(offset) = self.offset {
             search_builder.offset(offset);
         }
